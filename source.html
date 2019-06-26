@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+    <script type="text/javascript" language="javascript">
+    var local_all_forces=[]
+    function SpecificForce(PoliceID){
+        if (PoliceID in localStorage) {
+                console.log(JSON.parse(localStorage.getItem(PoliceID)))
+                ShowSpecificForces(PoliceID)
+                return JSON.parse(localStorage.getItem(PoliceID))
+        } 
+         else
+         {
+             fetch('https://data.police.uk/api/forces/'+PoliceID)
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(data){
+                        console.log(data)
+                        localStorage.setItem(PoliceID, JSON.stringify((data)))
+                        ShowSpecificForces(PoliceID)
+                        return JSON.parse(localStorage.getItem(PoliceID))
+
+                    })
+
+        }
+        }
+    function SeniorOfficers(PoliceID){
+        if (PoliceID+"/people" in localStorage) {
+                console.log(JSON.parse(localStorage.getItem(PoliceID+"/people")))
+                ShowSeniorOfficers(PoliceID)
+                return JSON.parse(localStorage.getItem(PoliceID+"/people"))
+        } 
+         else
+         {
+             fetch('https://data.police.uk/api/forces/'+PoliceID+"/people")
+                    .then(function(response) {
+                        return response.json();
+                    })
+                    .then(function(data){
+                        console.log(data)
+                        localStorage.setItem(PoliceID+"/people", JSON.stringify((data)))
+                        ShowSeniorOfficers(PoliceID)
+                        return JSON.parse(localStorage.getItem(PoliceID))
+
+                    })
+
+        }
+        }
+    
+        function AllForces(){
+        if ("forces" in localStorage) {
+
+            console.log(JSON.parse(localStorage.getItem('forces')))
+            local_all_forces = JSON.parse(localStorage.getItem('forces'))
+            ShowAllForces()
+            return JSON.parse(localStorage.getItem('forces'))
+        } 
+         else
+         {
+             fetch('https://data.police.uk/api/forces')
+                    .then(function(response) {
+                        return response.json();
+                        
+                    })
+                    .then(function(data){
+                        console.log(data)
+                        localStorage.setItem('forces', JSON.stringify((data)))
+                        local_all_forces = JSON.parse(localStorage.getItem('forces'))
+                        ShowAllForces()
+                        return data;
+                    })
+
+        }
+        }
+        function ready() {
+            // localStorage.clear
+            AllForces();
+             var i,temp;
+            for (i=0;i<Object.keys(local_all_forces).length;i++){
+                temp=local_all_forces[i]["id"];
+                SeniorOfficers(temp)
+                SpecificForce(temp)
+            }
+
+
+
+            
+        }
+        function ShowAllForces()
+        {
+            var i;
+            for (i=0;i<Object.keys(local_all_forces).length;i++){
+
+                var temp=local_all_forces[i]["name"];
+                var node = document.createElement("LI");      
+                var textnode = document.createTextNode(temp.charAt(0).toUpperCase() + temp.slice(1));     
+                node.appendChild(textnode);                        
+                document.getElementById("myList").appendChild(node); 
+  
+            }
+
+        }
+
+        function ShowSpecificForces(PoliceID)
+        {
+            var i;
+            specific_force = JSON.parse(localStorage.getItem(PoliceID))
+                var url=specific_force["url"]
+                var description=specific_force["description"];
+                var title=specific_force["title"]
+
+                var node1=document.createElement("ul");  
+                var node = document.createElement("LI"); 
+                 
+                var url = document.createTextNode(url);     
+                var description = document.createTextNode(description);   
+                var title = document.createTextNode(title);  
+
+                node.appendChild(url)
+                node.appendChild(description) 
+                node.appendChild(title) 
+                node1.appendChild(node)
+                document.getElementById("myList1").appendChild(node1); 
+        }
+        
+        function ShowSeniorOfficers(PoliceID)
+        {
+            var i;
+            senior_officers = JSON.parse(localStorage.getItem(PoliceID+"/people"))
+
+            for (i=0;i<Object.keys(senior_officers).length;i++){
+                var bio=senior_officers[i]["bio"];
+                var name=senior_officers[i]["name"];
+                var rank=senior_officers[i]["rank"]
+
+                var node1=document.createElement("ul");  
+                var node = document.createElement("LI"); 
+                 
+                var name = document.createTextNode(name);     
+                var bio = document.createTextNode(bio);   
+                var rank = document.createTextNode(rank);  
+
+                node.appendChild(name)
+                node.appendChild(bio) 
+                node.appendChild(rank) 
+                node1.appendChild(node)
+                document.getElementById("myList2").appendChild(node1); 
+  
+            }
+        }
+        document.addEventListener("DOMContentLoaded", ready);
+</script>
+</head>
+<body>
+    <div class="container">
+    <h1>View the List of all Forces</h1>
+    <ul id="myList">
+                  
+        </ul>
+                  
+                    
+    <h1>View the List of Specific Force Details</h1>
+            <div id="myList1">
+                  
+                  </div>
+                  
+                    
+    </div>
+    <h1>View the List of all Forces' Senior Officers</h1>
+            <div id="myList2">
+                  
+            </div>
+                  
+                    
+    
+    </div>
+</body>
+</html>
